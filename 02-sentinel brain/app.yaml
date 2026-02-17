@@ -1,11 +1,29 @@
-# app.yaml - Requerido para despliegue en Databricks Apps
 command:
-  - "gunicorn"
+  - "uvicorn"
   - "app.main:app"
-  - "-w"
-  - "2"
-  - "--worker-class"
-  - "uvicorn.workers.UvicornWorker"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8000"
 env:
-  - name: "DATABRICKS_WAREHOUSE_ID"
-    value: "tu_id_de_warehouse" # Se inyectará desde la plataforma
+  # Referencia segura a los secretos 
+  - name: "DATABRICKS_HOST"
+    value: "https://dbc-5d7bda81-22c8.cloud.databricks.com" 
+    
+  - name: "DATABRICKS_TOKEN"
+    valueFrom: "sentinel_token_res"
+    
+  - name: "DATABRICKS_HTTP_PATH"
+    valueFrom: "sentinel_path_res"
+
+resources:
+  - name: "sentinel_token_res"
+    type: "secret"
+    secret:
+      scope: "sentinel-secrets"
+      key: "token"
+  - name: "sentinel_path_res"
+    type: "secret"
+    secret:
+      scope: "sentinel-secrets"
+      key: "http-path"
