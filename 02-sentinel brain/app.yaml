@@ -1,0 +1,11 @@
+# app.yaml - Requerido para despliegue en Databricks Apps
+command:
+  - "gunicorn"
+  - "app.main:app"
+  - "-w"
+  - "2"
+  - "--worker-class"
+  - "uvicorn.workers.UvicornWorker"
+env:
+  - name: "DATABRICKS_WAREHOUSE_ID"
+    value: "tu_id_de_warehouse" # Se inyectará desde la plataforma

@@ -1,0 +1,8 @@
+fastapi==0.115.0
+uvicorn==0.29.0
+gunicorn==23.0.0
+pydantic==2.10.3
+pandas>=2.2.3  # Versión mínima para Python 3.13
+scikit-learn>=1.5.0
+databricks-sdk==0.30.0
+python-dotenv==1.0.1
