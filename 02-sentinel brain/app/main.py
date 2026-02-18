@@ -55,17 +55,36 @@ class MLModelWrapper:
 ml_wrapper = MLModelWrapper()
 state = SimpleNamespace(last_ingested_at=None, model=None)
 async def fetch_latest_record_from_databricks():
-    host, token, warehouse_id = get_db_config().values()
-    w = WorkspaceClient(host=host, token=token)
+    config = get_db_config()
     query = "SELECT payload, ingested_at FROM bronze.raw_telemetry ORDER BY ingested_at DESC LIMIT 1"
+    
+    def _blocking_call():
+        # Limpiar variables de entorno OAuth temporalmente
+        oauth_backup = {}
+        for key in ['DATABRICKS_CLIENT_ID', 'DATABRICKS_CLIENT_SECRET']:
+            if key in os.environ:
+                oauth_backup[key] = os.environ.pop(key)
+        
+        try:
+            w = WorkspaceClient(
+                host=config["host"],
+                token=config["token"]
+            )
+            
+            res = w.statement_execution.execute_statement(
+                warehouse_id=config["warehouse_id"],
+                statement=query,
+                wait_timeout="10s"
+            )
+            return res
+        finally:
+            # Restaurar variables OAuth
+            for key, value in oauth_backup.items():
+                os.environ[key] = value
     
     try:
         loop = asyncio.get_event_loop()
-        res = await loop.run_in_executor(None, lambda: w.statement_execution.execute_statement(
-            warehouse_id=warehouse_id,
-            statement=query,
-            wait_timeout="10s"
-        ))
+        res = await loop.run_in_executor(None, _blocking_call)
         
         if res.result and res.result.data_array:
             row = res.result.data_array[0]
@@ -132,11 +151,12 @@ async def monitor_loop():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    task = asyncio.create_task(monitor_loop())
+    # descomentar esta linea para hacer el alert
+    #task = asyncio.create_task(monitor_loop())
     ml_wrapper.load_model()
     state.model = ml_wrapper.model
     yield
-    task.cancel()
+    #task.cancel()
 
 app = FastAPI(lifespan=lifespan, title="Sentinel Brain API")
 thread_pool = ThreadPoolExecutor(max_workers=5)
@@ -155,25 +175,39 @@ async def execute_databricks_query_async(query: str):
     config = get_db_config()
     
     def _blocking_call():
-        w = WorkspaceClient(host=config["host"], token=config["token"])
+        # Limpiar variables de entorno OAuth temporalmente
+        oauth_backup = {}
+        for key in ['DATABRICKS_CLIENT_ID', 'DATABRICKS_CLIENT_SECRET']:
+            if key in os.environ:
+                oauth_backup[key] = os.environ.pop(key)
         
-        response = w.statement_execution.execute_statement(
-            warehouse_id=config["warehouse_id"],
-            statement=query,
-            wait_timeout="10s"
-        )
-        
-        statement_id = response.statement_id
-        
-        while response.status.state in [StatementState.PENDING, StatementState.RUNNING]:
-             response = w.statement_execution.get_statement(statement_id)
-             if response.status.state in [StatementState.SUCCEEDED, StatementState.FAILED, StatementState.CANCELED]:
-                 break
-        
-        if response.status.state != StatementState.SUCCEEDED:
-            raise Exception(f"Query falló con estado: {response.status.state}")
+        try:
+            w = WorkspaceClient(
+                host=config["host"],
+                token=config["token"]
+            )
             
-        return response
+            response = w.statement_execution.execute_statement(
+                warehouse_id=config["warehouse_id"],
+                statement=query,
+                wait_timeout="10s"
+            )
+            
+            statement_id = response.statement_id
+            
+            while response.status.state in [StatementState.PENDING, StatementState.RUNNING]:
+                 response = w.statement_execution.get_statement(statement_id)
+                 if response.status.state in [StatementState.SUCCEEDED, StatementState.FAILED, StatementState.CANCELED]:
+                     break
+            
+            if response.status.state != StatementState.SUCCEEDED:
+                raise Exception(f"Query falló con estado: {response.status.state}")
+                
+            return response
+        finally:
+            # Restaurar variables OAuth
+            for key, value in oauth_backup.items():
+                os.environ[key] = value
 
     loop = asyncio.get_event_loop()
     try:
