@@ -21,7 +21,7 @@ type Telemetry struct {
 	EventSource   string
 	Payload       string
 	CorrelationID string
-	ingestedAt   time.Time
+	ingestedAt    time.Time
 }
 
 func main() {
@@ -71,7 +71,7 @@ func main() {
 					EventSource:   "fake_source",
 					Payload:       generateFakeMetric(),
 					CorrelationID: fmt.Sprintf("%d", rand.Int()),
-					ingestedAt:   time.Now(),
+					ingestedAt:    time.Now(),
 				}
 				err := insertTelemetry(db, telemetry)
 				if err != nil {
@@ -95,9 +95,19 @@ func insertTelemetry(db *sql.DB, t Telemetry) error {
 }
 
 func generateFakeMetric() string {
+	// Generamos valores altos (>50) para que el IsolationForest (entrenado con ~10) detecte anomalías.
+	cpu := 50 + rand.Float64()*50 // Rango: 50.0 - 100.0
+	mem := 50 + rand.Float64()*50 // Rango: 50.0 - 100.0
+
+	// Descomentar para simular un sistema sano.
+	/*
+		cpu := rand.Float64() * 15 // Rango: 0.0 - 15.0
+		mem := rand.Float64() * 15 // Rango: 0.0 - 15.0
+	*/
+
 	metrics := map[string]interface{}{
-		"cpu_usage":    rand.Float64() * 100,
-		"memory_usage": rand.Float64() * 100,
+		"cpu_usage":    cpu,
+		"memory_usage": mem,
 		"timestamp":    time.Now().Format(time.RFC3339),
 	}
 	bytes, _ := json.Marshal(metrics)

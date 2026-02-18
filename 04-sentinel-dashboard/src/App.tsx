@@ -12,7 +12,12 @@ interface SentinelLog {
   server_timestamp: string; // ISO String generado en el Alerter
 }
 
-const socket = io("https://sentinel-demo-7bb0.onrender.com");
+const socket = io("https://sentinel-demo-7bb0.onrender.com", {
+  transports: ["websocket", "polling"], // Forzar websocket primero, caer en polling si es necesario
+  withCredentials: true,
+  path: "/socket.io/", // Path default de socket.io, asegurarse que sea el mismo en server
+  reconnection: true,
+});
 
 
 export default function App() {

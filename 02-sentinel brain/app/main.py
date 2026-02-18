@@ -152,11 +152,11 @@ async def monitor_loop():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # descomentar esta linea para hacer el alert
-    #task = asyncio.create_task(monitor_loop())
+    task = asyncio.create_task(monitor_loop())
     ml_wrapper.load_model()
     state.model = ml_wrapper.model
     yield
-    #task.cancel()
+    task.cancel()
 
 app = FastAPI(lifespan=lifespan, title="Sentinel Brain API")
 thread_pool = ThreadPoolExecutor(max_workers=5)
