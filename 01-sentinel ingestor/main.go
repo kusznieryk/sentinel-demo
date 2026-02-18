@@ -21,6 +21,7 @@ type Telemetry struct {
 	EventSource   string
 	Payload       string
 	CorrelationID string
+	ingestedAt   time.Time
 }
 
 func main() {
@@ -70,6 +71,7 @@ func main() {
 					EventSource:   "fake_source",
 					Payload:       generateFakeMetric(),
 					CorrelationID: fmt.Sprintf("%d", rand.Int()),
+					ingestedAt:   time.Now(),
 				}
 				err := insertTelemetry(db, telemetry)
 				if err != nil {
@@ -87,8 +89,8 @@ func main() {
 }
 
 func insertTelemetry(db *sql.DB, t Telemetry) error {
-	query := `INSERT INTO bronze.raw_telemetry (event_source, payload, correlation_id) VALUES (?,?,?)`
-	_, err := db.Exec(query, t.EventSource, t.Payload, t.CorrelationID)
+	query := `INSERT INTO bronze.raw_telemetry (event_source, payload, correlation_id, ingested_at) VALUES (?,?,?,?)`
+	_, err := db.Exec(query, t.EventSource, t.Payload, t.CorrelationID, t.ingestedAt)
 	return err
 }
 
