@@ -27,15 +27,3 @@ Implementación:
 Uso de Shadcn UI para componentes de tablas (DataTable) y visualización de estados (Skeletons/Badges) .
 Integración de Recharts para gráficos temporales de métricas.
 Patrón de diseño de "layout shell" para mantener estabilidad en cambios de ruta.
-# 3. Plan de Desarrollo (72 Horas)
-
-| Bloque | Tareas | Hito Clave |
-| :--- | :--- | :--- |
-| **Día 1: Ingesta** | Setup de Unity Catalog, código Go de ingesta, Dockerización multi-stage. | Datos fluyendo a Databricks. |
-| **Día 2: Backend** | FastAPI Brain con lógica de ML, integración de Node.js Alerter, Tests unitarios (Pytest). | Predicciones de IA funcionando. |
-| **Día 3: UI & Ops** | Dashboard en React con Shadcn, manifiestos de K8s (Deployment/Service), Test E2E. | Sistema integrado localmente. |
-
-# 4. Estrategia de Calidad y Testing
-Backend (Python): Uso de pytest-mock para simular respuestas de Databricks durante las pruebas unitarias .
-Frontend (JavaScript): Pruebas de renderizado con Vitest y simulación de flujos con Playwright.10
-CI/CD (Simulado): Inclusión de un archivo Makefile que automatice el linting (Ruff/ESLint) y la ejecución de la suite de pruebas.
