@@ -15,7 +15,7 @@ import asyncio
 import logging
 import httpx
 load_dotenv()
-NODE_ALERTER_URL = "https://sentinel-demo-7bb0.onrender.com:10000/api/v1/webhook/anomaly"  # Cambia al URL de tu Alerter
+NODE_ALERTER_URL = "https://sentinel-demo-7bb0.onrender.com/api/v1/webhook/anomaly"  # Cambia al URL de tu Alerter
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("sentinel_brain")
 class AnomalyResponse(BaseModel):
