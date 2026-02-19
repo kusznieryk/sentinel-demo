@@ -12,7 +12,6 @@ interface SentinelLog {
   server_timestamp: string; // ISO String generado en el Alerter
 }
 
-await fetch("https://sentinel-demo-7bb0.onrender.com/health");
 const socket = io("https://sentinel-demo-7bb0.onrender.com", {
   transports: ["websocket", "polling"], // Forzar websocket primero, caer en polling si es necesario
   path: "/socket.io/", // Path default de socket.io, asegurarse que sea el mismo en server

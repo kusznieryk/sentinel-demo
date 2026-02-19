@@ -4,13 +4,12 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://localhost:5173')
+const ALLOWED_ORIGINS = ('http://localhost:3000,http://localhost:5173,https://sentinel-demo-1.onrender.com/')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
 
 const isOriginAllowed = (origin, callback) => {
-  // permite requests no-browser (curl, servidores) cuando no hay Origin
   if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
   return callback(new Error('Not allowed by CORS'));
 };
