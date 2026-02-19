@@ -18,7 +18,6 @@ const isOriginAllowed = (origin, callback) => {
 const corsOptions = {
   origin: isOriginAllowed,
   methods: ['GET', 'POST', 'OPTIONS'],
-  credentials: true,
 };
 
 const app = express();
